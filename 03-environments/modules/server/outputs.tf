@@ -7,3 +7,7 @@ output "config_file" {
   description = "Path to the generated server configuration"
   value       = local_file.server_config.filename
 }
+output "ip_address" {
+  description = "IP address of the server"
+  value       = var.ip_address
+}

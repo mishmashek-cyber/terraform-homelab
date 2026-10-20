@@ -1,6 +1,0 @@
-Hostname:    app-prod-01
-Environment: prod
-CPU:         4
-Memory:      16 GB
-VLAN:        vlan-prod-100
-Backup:      enabled

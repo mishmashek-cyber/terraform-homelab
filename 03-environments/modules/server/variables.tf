@@ -27,3 +27,8 @@ variable "backup_enabled" {
   description = "Whether backup is enabled for the server"
   type        = bool
 }
+
+variable "ip_address" {
+  description = "IP address assigned to the server"
+  type        = string
+}

@@ -31,3 +31,6 @@ state-backups/
 # Generated dependency graphs
 02-modules/graph.dot
 02-modules/graph.png
+
+# Generated server resources
+03-environments/environments/*/*.txt

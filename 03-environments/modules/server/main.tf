@@ -8,6 +8,7 @@ resource "local_file" "server_config" {
     Memory:      ${var.memory_gb} GB
     VLAN:        ${var.vlan}
     Backup:      ${var.backup_enabled ? "enabled" : "disabled"}
+    IP Address:  ${var.ip_address}
   EOT
 
   file_permission = "0644"

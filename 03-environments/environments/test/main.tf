@@ -16,4 +16,5 @@ module "server" {
   memory_gb      = 8
   vlan           = "vlan-test-100"
   backup_enabled = true
+  ip_address     = "192.168.110.21"
 }
