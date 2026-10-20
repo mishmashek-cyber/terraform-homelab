@@ -1,0 +1,6 @@
+Hostname:    app-test-01
+Environment: test
+CPU:         2
+Memory:      8 GB
+VLAN:        vlan-test-100
+Backup:      enabled

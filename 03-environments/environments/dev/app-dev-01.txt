@@ -1,0 +1,6 @@
+Hostname:    app-dev-01
+Environment: dev
+CPU:         2
+Memory:      4 GB
+VLAN:        vlan-dev-100
+Backup:      disabled
