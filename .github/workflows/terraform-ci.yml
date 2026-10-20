@@ -9,8 +9,24 @@ on:
       - main
 
 jobs:
-  terraform:
-    name: Terraform validation
+  format:
+    name: Terraform format check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.6
+
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive
+
+  validate:
+    name: Terraform validation (${{ matrix.environment }})
     runs-on: ubuntu-latest
 
     strategy:
@@ -32,9 +48,6 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.16.6
-
-      - name: Terraform format check
-        run: terraform fmt -check -recursive ../../../
 
       - name: Terraform init
         run: terraform init -backend=false
