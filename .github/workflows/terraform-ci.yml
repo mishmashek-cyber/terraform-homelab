@@ -26,19 +26,20 @@ jobs:
         run: terraform fmt -check -recursive
 
   validate:
-    name: Terraform validation (${{ matrix.environment }})
+    name: Terraform validation (${{ matrix.directory }})
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        environment:
-          - dev
-          - test
-          - prod
+        directory:
+          - 03-environments/environments/dev
+          - 03-environments/environments/test
+          - 03-environments/environments/prod
+          - 04-azure
 
     defaults:
       run:
-        working-directory: 03-environments/environments/${{ matrix.environment }}
+        working-directory: ${{ matrix.directory }}
 
     steps:
       - name: Checkout repository
