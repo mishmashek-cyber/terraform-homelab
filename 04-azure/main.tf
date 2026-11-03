@@ -103,7 +103,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   admin_ssh_key {
     username   = "azureadmin"
-    public_key = file(pathexpand("~/.ssh/azure_lab_ed25519.pub"))
+    public_key = var.admin_ssh_public_key
   }
 
   os_disk {
