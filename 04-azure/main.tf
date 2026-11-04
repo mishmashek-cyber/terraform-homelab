@@ -138,3 +138,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
     managed_by  = "terraform"
   }
 }
+
+data "azurerm_resource_group" "network_watcher" {
+  name = "NetworkWatcherRG"
+}
