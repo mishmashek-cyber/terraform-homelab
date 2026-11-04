@@ -15,3 +15,13 @@ output "vm_public_ips" {
     key => ip.ip_address
   }
 }
+
+output "network_watcher_rg" {
+  description = "Information about the existing Network Watcher resource group"
+
+  value = {
+    id       = data.azurerm_resource_group.network_watcher.id
+    name     = data.azurerm_resource_group.network_watcher.name
+    location = data.azurerm_resource_group.network_watcher.location
+  }
+}
