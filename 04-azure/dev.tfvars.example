@@ -1,0 +1,13 @@
+vms = {
+  vm01 = {
+    name              = "linux-dev-01"
+    size              = "Standard_B2ts_v2"
+    public_ip_enabled = true
+  }
+
+  vm02 = {
+    name              = "linux-dev-02"
+    size              = "Standard_B2ts_v2"
+    public_ip_enabled = false
+  }
+}

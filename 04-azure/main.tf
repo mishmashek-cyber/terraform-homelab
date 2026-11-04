@@ -29,10 +29,16 @@ resource "azurerm_subnet" "app" {
 }
 
 resource "azurerm_public_ip" "vm" {
-  name                = "pip-linux-dev-01"
-  location            = azurerm_virtual_network.dev.location
+  for_each = {
+    for key, vm in var.vms : key => vm
+    if vm.public_ip_enabled
+  }
+
+  name                = "pip-${each.value.name}"
   resource_group_name = azurerm_resource_group.dev.name
+  location            = azurerm_virtual_network.dev.location
   allocation_method   = "Static"
+  sku                 = "Standard"
 
   tags = {
     environment = "dev"
@@ -40,23 +46,7 @@ resource "azurerm_public_ip" "vm" {
   }
 }
 
-resource "azurerm_network_interface" "vm" {
-  name                = "nic-linux-dev-01"
-  location            = azurerm_virtual_network.dev.location
-  resource_group_name = azurerm_resource_group.dev.name
 
-  ip_configuration {
-    name                          = "internal"
-    subnet_id                     = azurerm_subnet.app.id
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.vm.id
-  }
-
-  tags = {
-    environment = "dev"
-    managed_by  = "terraform"
-  }
-}
 
 resource "azurerm_network_security_group" "app" {
   name                = "nsg-app-dev"
@@ -90,42 +80,11 @@ resource "azurerm_subnet_network_security_group_association" "app" {
   network_security_group_id = azurerm_network_security_group.app.id
 }
 
-resource "azurerm_linux_virtual_machine" "vm" {
-  name                = "vm-linux-dev-01"
-  resource_group_name = azurerm_resource_group.dev.name
-  location            = azurerm_virtual_network.dev.location
-  size                = "Standard_B2ts_v2"
-  admin_username      = "azureadmin"
 
-  network_interface_ids = [
-    azurerm_network_interface.vm.id
-  ]
+resource "azurerm_network_interface" "vm" {
+  for_each = var.vms
 
-  admin_ssh_key {
-    username   = "azureadmin"
-    public_key = var.admin_ssh_public_key
-  }
-
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
-  }
-
-  source_image_reference {
-    publisher = "Canonical"
-    offer     = "ubuntu-24_04-lts"
-    sku       = "server"
-    version   = "latest"
-  }
-
-  tags = {
-    environment = "dev"
-    managed_by  = "terraform"
-  }
-}
-
-resource "azurerm_network_interface" "vm02" {
-  name                = "nic-linux-dev-02"
+  name                = "nic-${each.value.name}"
   location            = azurerm_virtual_network.dev.location
   resource_group_name = azurerm_resource_group.dev.name
 
@@ -133,6 +92,9 @@ resource "azurerm_network_interface" "vm02" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.app.id
     private_ip_address_allocation = "Dynamic"
+
+    # Public IP připojíme jen VM, která ho má
+    public_ip_address_id = each.value.public_ip_enabled ? azurerm_public_ip.vm[each.key].id : null
   }
 
   tags = {
@@ -141,15 +103,17 @@ resource "azurerm_network_interface" "vm02" {
   }
 }
 
-resource "azurerm_linux_virtual_machine" "vm02" {
-  name                = "vm-linux-dev-02"
+resource "azurerm_linux_virtual_machine" "vm" {
+  for_each = var.vms
+
+  name                = "vm-${each.value.name}"
   resource_group_name = azurerm_resource_group.dev.name
   location            = azurerm_virtual_network.dev.location
-  size                = "Standard_B2ts_v2"
+  size                = each.value.size
   admin_username      = "azureadmin"
 
   network_interface_ids = [
-    azurerm_network_interface.vm02.id
+    azurerm_network_interface.vm[each.key].id
   ]
 
   admin_ssh_key {
