@@ -123,3 +123,54 @@ resource "azurerm_linux_virtual_machine" "vm" {
     managed_by  = "terraform"
   }
 }
+
+resource "azurerm_network_interface" "vm02" {
+  name                = "nic-linux-dev-02"
+  location            = azurerm_virtual_network.dev.location
+  resource_group_name = azurerm_resource_group.dev.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.app.id
+    private_ip_address_allocation = "Dynamic"
+  }
+
+  tags = {
+    environment = "dev"
+    managed_by  = "terraform"
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "vm02" {
+  name                = "vm-linux-dev-02"
+  resource_group_name = azurerm_resource_group.dev.name
+  location            = azurerm_virtual_network.dev.location
+  size                = "Standard_B2ts_v2"
+  admin_username      = "azureadmin"
+
+  network_interface_ids = [
+    azurerm_network_interface.vm02.id
+  ]
+
+  admin_ssh_key {
+    username   = "azureadmin"
+    public_key = var.admin_ssh_public_key
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "ubuntu-24_04-lts"
+    sku       = "server"
+    version   = "latest"
+  }
+
+  tags = {
+    environment = "dev"
+    managed_by  = "terraform"
+  }
+}
