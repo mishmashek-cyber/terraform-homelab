@@ -7,6 +7,8 @@ module "network" {
   address_space           = var.environment.network.address_space
   subnet_name             = var.environment.network.subnet_name
   subnet_address_prefixes = var.environment.network.subnet_address_prefixes
+  nsg_name                = var.environment.network.nsg_name
+  nsg_rules               = var.environment.network.nsg_rules
 
   tags = {
     environment = var.environment.name
@@ -33,38 +35,6 @@ resource "azurerm_public_ip" "vm" {
 }
 
 
-
-resource "azurerm_network_security_group" "app" {
-  name                = "nsg-app-dev"
-  location            = var.environment.network.location
-  resource_group_name = var.environment.resource_group
-
-  tags = {
-    environment = "dev"
-    managed_by  = "terraform"
-  }
-}
-
-resource "azurerm_network_security_rule" "ssh" {
-  name                       = "allow-ssh"
-  priority                   = 100
-  direction                  = "Inbound"
-  access                     = "Allow"
-  protocol                   = "Tcp"
-  source_port_range          = "*"
-  destination_port_range     = "22"
-  source_address_prefix      = "193.179.215.98/32"
-  destination_address_prefix = "*"
-
-  resource_group_name         = var.environment.resource_group
-  network_security_group_name = azurerm_network_security_group.app.name
-}
-
-
-resource "azurerm_subnet_network_security_group_association" "app" {
-  subnet_id                 = module.network.subnet_id
-  network_security_group_id = azurerm_network_security_group.app.id
-}
 
 
 resource "azurerm_network_interface" "vm" {
