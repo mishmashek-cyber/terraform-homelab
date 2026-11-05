@@ -11,3 +11,20 @@ variable "vms" {
     public_ip_enabled = bool
   }))
 }
+
+variable "environment" {
+  description = "Environment configuration"
+
+  type = object({
+    name           = string
+    resource_group = string
+
+    network = object({
+      name                    = string
+      location                = string
+      address_space           = list(string)
+      subnet_name             = string
+      subnet_address_prefixes = list(string)
+    })
+  })
+}
