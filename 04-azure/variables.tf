@@ -3,25 +3,16 @@ variable "admin_ssh_public_key" {
   type        = string
 }
 
-variable "vms" {
-  description = "Linux virtual machines to deploy"
-  type = map(object({
-    name              = string
-    size              = string
-    public_ip_enabled = bool
-  }))
-}
-
 variable "environment" {
   description = "Environment configuration"
 
   type = object({
     name           = string
     resource_group = string
+    location       = string
 
     network = object({
       name                    = string
-      location                = string
       address_space           = list(string)
       subnet_name             = string
       subnet_address_prefixes = list(string)
@@ -38,5 +29,28 @@ variable "environment" {
         destination_address_prefix = string
       }))
     })
+
+    vm_defaults = object({
+
+      size              = string
+      admin_username    = string
+      public_ip_enabled = bool
+
+      os_disk = object({
+        caching              = string
+        storage_account_type = string
+      })
+
+      source_image_reference = object({
+        publisher = string
+        offer     = string
+        sku       = string
+        version   = string
+      })
+    })
+    vms = map(object({
+      name              = string
+      public_ip_enabled = optional(bool)
+    }))
   })
 }
