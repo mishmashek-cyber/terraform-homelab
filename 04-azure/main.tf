@@ -1,13 +1,3 @@
-resource "azurerm_resource_group" "dev" {
-  name     = "rg-terraform-dev"
-  location = "West Europe"
-
-  tags = {
-    environment = "dev"
-    managed_by  = "terraform"
-  }
-}
-
 
 resource "azurerm_virtual_network" "dev" {
   name                = "vnet-terraform-dev"
