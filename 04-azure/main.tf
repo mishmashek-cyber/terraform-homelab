@@ -1,24 +1,17 @@
-data "azurerm_resource_group" "dev" {
-  name = "rg-terraform-dev"
-}
+module "network" {
+  source = "./modules/network"
 
-resource "azurerm_virtual_network" "dev" {
-  name                = "vnet-terraform-dev"
-  address_space       = ["10.10.0.0/16"]
-  location            = "Sweden Central"
-  resource_group_name = data.azurerm_resource_group.dev.name
+  name                    = var.environment.network.name
+  location                = var.environment.network.location
+  resource_group_name     = var.environment.resource_group
+  address_space           = var.environment.network.address_space
+  subnet_name             = var.environment.network.subnet_name
+  subnet_address_prefixes = var.environment.network.subnet_address_prefixes
 
   tags = {
-    environment = "dev"
+    environment = var.environment.name
     managed_by  = "terraform"
   }
-}
-
-resource "azurerm_subnet" "app" {
-  name                 = "snet-app-dev"
-  resource_group_name  = data.azurerm_resource_group.dev.name
-  virtual_network_name = azurerm_virtual_network.dev.name
-  address_prefixes     = ["10.10.1.0/24"]
 }
 
 resource "azurerm_public_ip" "vm" {
@@ -28,8 +21,8 @@ resource "azurerm_public_ip" "vm" {
   }
 
   name                = "pip-${each.value.name}"
-  resource_group_name = data.azurerm_resource_group.dev.name
-  location            = azurerm_virtual_network.dev.location
+  resource_group_name = var.environment.resource_group
+  location            = var.environment.network.location
   allocation_method   = "Static"
   sku                 = "Standard"
 
@@ -43,8 +36,8 @@ resource "azurerm_public_ip" "vm" {
 
 resource "azurerm_network_security_group" "app" {
   name                = "nsg-app-dev"
-  location            = azurerm_virtual_network.dev.location
-  resource_group_name = data.azurerm_resource_group.dev.name
+  location            = var.environment.network.location
+  resource_group_name = var.environment.resource_group
 
   tags = {
     environment = "dev"
@@ -63,13 +56,13 @@ resource "azurerm_network_security_rule" "ssh" {
   source_address_prefix      = "193.179.215.98/32"
   destination_address_prefix = "*"
 
-  resource_group_name         = data.azurerm_resource_group.dev.name
+  resource_group_name         = var.environment.resource_group
   network_security_group_name = azurerm_network_security_group.app.name
 }
 
 
 resource "azurerm_subnet_network_security_group_association" "app" {
-  subnet_id                 = azurerm_subnet.app.id
+  subnet_id                 = module.network.subnet_id
   network_security_group_id = azurerm_network_security_group.app.id
 }
 
@@ -78,12 +71,12 @@ resource "azurerm_network_interface" "vm" {
   for_each = var.vms
 
   name                = "nic-${each.value.name}"
-  location            = azurerm_virtual_network.dev.location
-  resource_group_name = data.azurerm_resource_group.dev.name
+  location            = var.environment.network.location
+  resource_group_name = var.environment.resource_group
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.app.id
+    subnet_id                     = module.network.subnet_id
     private_ip_address_allocation = "Dynamic"
 
     # Public IP připojíme jen VM, která ho má
@@ -100,8 +93,8 @@ resource "azurerm_linux_virtual_machine" "vm" {
   for_each = var.vms
 
   name                = "vm-${each.value.name}"
-  resource_group_name = data.azurerm_resource_group.dev.name
-  location            = azurerm_virtual_network.dev.location
+  resource_group_name = var.environment.resource_group
+  location            = var.environment.network.location
   size                = each.value.size
   admin_username      = "azureadmin"
 
