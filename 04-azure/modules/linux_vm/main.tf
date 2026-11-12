@@ -44,23 +44,14 @@ resource "azurerm_network_interface" "vm" {
     private_ip_address_allocation = "Dynamic"
 
     # Public IP připojíme jen VM, která ho má
-    public_ip_address_id = coalesce(
-      each.value.public_ip_enabled,
-      var.vm_defaults.public_ip_enabled
-    ) ? azurerm_public_ip.vm[each.key].id : null
+    public_ip_address_id = local.public_ip_address_ids[each.key]
   }
 
   tags = var.tags
 }
 
 resource "azurerm_public_ip" "vm" {
-  for_each = {
-    for key, vm in var.vms : key => vm
-    if coalesce(
-      vm.public_ip_enabled,
-      var.vm_defaults.public_ip_enabled
-    )
-  }
+  for_each = local.public_ip_vms
 
   name                = "pip-${each.value.name}"
   resource_group_name = var.resource_group

@@ -53,4 +53,9 @@ variable "environment" {
       public_ip_enabled = optional(bool)
     }))
   })
+
+  validation {
+    condition     = contains(["dev", "test", "prod"], var.environment.name)
+    error_message = "The environment name must be one of: dev, test, or prod."
+  }
 }

@@ -10,10 +10,7 @@ module "network" {
   nsg_name                = var.environment.network.nsg_name
   nsg_rules               = var.environment.network.nsg_rules
 
-  tags = {
-    environment = var.environment.name
-    managed_by  = "terraform"
-  }
+  tags = local.tags
 }
 
 module "linux_vm" {
@@ -26,10 +23,7 @@ module "linux_vm" {
   admin_ssh_public_key = var.admin_ssh_public_key
   subnet_id            = module.network.subnet_id
 
-  tags = {
-    environment = var.environment.name
-    managed_by  = "terraform"
-  }
+  tags = local.tags
 }
 
 data "azurerm_resource_group" "network_watcher" {
